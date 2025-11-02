@@ -529,16 +529,15 @@ if __name__ == "__main__":
     import sys
 
     # Check for an initialization flag (used by systemd)
-    # The flag --init will be used to run setup logic without starting the server.
     is_init_mode = "--init" in sys.argv
 
-    # Ensure DB & tables exist and run seed if required
     if is_init_mode:
+        # 1. Run initialization tasks
         log.info("Running database initialization (INIT MODE)...")
         with app.app_context():
             db.create_all()
-
-            # check if DB is empty (no orders) and optionally run seed_quick.py
+            
+            # Since the database is new, we should try the seed again
             try:
                 orders_exist = (db.session.query(db.func.count(Order.id)).scalar() or 0) > 0
             except Exception:
@@ -551,16 +550,17 @@ if __name__ == "__main__":
                     try:
                         import subprocess
                         log.info("DB empty or AUTO_SEED set — running seed_quick.py")
-                        # Use python3 explicit command to match your environment fix
+                        # Use the explicit /usr/bin/python3 command
                         subprocess.run(["/usr/bin/python3", str(seed_script)], check=True)
                         log.info("Seeding finished")
                     except Exception:
                         log.exception("Seeding failed; continuing without seed")
                 else:
                     log.warning("seed_quick.py not found; skipping auto-seed")
-        
-        log.info("Initialization complete. Exiting...")
-        sys.exit(0) # Exit cleanly after initialization
 
-    # Normal development-friendly run (set DEBUG via env if you want)
+        # 2. EXIT CLEANLY so the service can proceed to ExecStart (Gunicorn)
+        log.info("Initialization complete. Exiting...")
+        sys.exit(0)
+
+    # 3. Normal development-friendly run (only runs if --init is NOT present)
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=os.environ.get("FLASK_DEBUG", "0") == "1")

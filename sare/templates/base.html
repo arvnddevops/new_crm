@@ -1,40 +1,28 @@
+<!-- ...existing code... -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ business }} - CRM</title>
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
 
     <style>
-        body {
-            background: #f8f9fa;
-        }
+        body { background: #f8f9fa; }
         .sidebar {
             min-height: 100vh;
-            background: white;
+            background: #fff;
             border-right: 1px solid #e5e5e5;
             padding: 20px 15px;
+            width: 220px;
         }
-        .sidebar a {
-            display: block;
-            padding: 8px 0;
-            font-size: 15px;
-            font-weight: 500;
-            color: #333;
-            text-decoration: none;
-        }
-        .sidebar a:hover {
-            color: #0d6efd;
-        }
-        .content {
-            padding: 25px;
-        }
+        .sidebar a { display:block; padding:8px 0; font-size:15px; color:#333; text-decoration:none; }
+        .sidebar a:hover { color:#0d6efd; }
+        .content { padding: 25px; }
     </style>
 </head>
-
 <body>
 <div class="d-flex">
     <!-- Sidebar -->
@@ -62,11 +50,11 @@
             {% endif %}
         {% endwith %}
 
-        {% block body %}{% endblock %}
+        {% block content %}{% endblock %}
     </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>
-
+<!-- ...existing code... -->

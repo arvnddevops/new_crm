@@ -6,73 +6,124 @@
     <a href="{{ url_for('orders') }}" class="btn btn-secondary btn-sm">← Back</a>
 </div>
 
-<form method="POST" action="">
-    <div class="card">
-        <div class="card-body">
+<form method="post" class="row g-3 needs-validation" novalidate>
+  <div class="col-md-2">
+    <label class="form-label">Date</label>
+    <input type="date" name="date" class="form-control" required>
+    <div class="invalid-feedback">Select date</div>
+  </div>
 
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Customer</label>
-                    <select name="customer_id" class="form-select" required>
-                        <option value="">-- Select Customer --</option>
-                        {% for c in customers %}
-                        <option value="{{ c.id }}" {% if order and c.id == order.customer_id %}selected{% endif %}>
-                            {{ c.name }} - {{ c.city }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
+  <div class="col-md-4">
+    <label class="form-label">Customer</label>
+    <!-- recent-first comes from the view; keep this select -->
+    <select name="customer_id" class="form-select" required>
+      <option value="">-- Select Customer --</option>
+      {% for c in customers_recent_first %}
+        <option value="{{ c.customer_id }}">{{ c.customer_id }} — {{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <div class="invalid-feedback">Choose a customer</div>
+  </div>
 
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Order Date</label>
-                    <input type="date" name="order_date" value="{{ order.order_date if order else '' }}" class="form-control" required>
-                </div>
+  <div class="col-md-3">
+    <label class="form-label">Saree Type</label>
+    <input name="saree_type" class="form-control" placeholder="e.g., Banarasi" required>
+    <div class="invalid-feedback">Enter saree type</div>
+  </div>
 
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Delivery Status</label>
-                    <select name="delivery_status" class="form-select" required>
-                        {% set status = order.delivery_status if order else '' %}
-                        <option value="Pending"   {{ "selected" if status == "Pending" else "" }}>Pending</option>
-                        <option value="Shipped"   {{ "selected" if status == "Shipped" else "" }}>Shipped</option>
-                        <option value="Delivered" {{ "selected" if status == "Delivered" else "" }}>Delivered</option>
-                    </select>
-                </div>
-            </div>
+  <div class="col-md-3">
+    <label class="form-label">Amount (₹)</label>
+    <input name="amount" inputmode="numeric" class="form-control" required>
+    <div class="invalid-feedback">Enter amount</div>
+  </div>
 
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Total Amount (₹)</label>
-                    <input type="number" name="amount" value="{{ order.amount if order else '' }}" class="form-control" required>
-                </div>
+  <div class="col-md-3">
+    <label class="form-label">Purchase Type</label>
+    <select name="purchase_type" class="form-select" required>
+      <option value="">-- Select Purchase Type --</option>
+      <option>Online</option>
+      <option>Offline</option>
+    </select>
+    <div class="invalid-feedback">Pick purchase type</div>
+  </div>
 
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Paid Amount (₹)</label>
-                    <input type="number" name="paid_amount" value="{{ order.paid_amount if order else '' }}" class="form-control" required>
-                </div>
+  <div class="col-md-3">
+    <label class="form-label">Payment Status</label>
+    <select id="payment_status" name="payment_status" class="form-select" required>
+      <option value="">-- Select Payment Status --</option>
+      <option value="Pending">Pending</option>
+      <option value="Paid">Paid</option>
+    </select>
+    <div class="invalid-feedback">Pick payment status</div>
+  </div>
 
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Payment Status</label>
-                    <select name="payment_status" class="form-select" required>
-                        {% set ps = order.payment_status if order else '' %}
-                        <option value="Paid"     {{ "selected" if ps == "Paid" else "" }}>Paid</option>
-                        <option value="Pending"  {{ "selected" if ps == "Pending" else "" }}>Pending</option>
-                        <option value="Partial"  {{ "selected" if ps == "Partial" else "" }}>Partial</option>
-                    </select>
-                </div>
-            </div>
+  <div class="col-md-3">
+    <label class="form-label">Payment Mode</label>
+    <select id="payment_mode" name="payment_mode" class="form-select">
+      <option value="">-- Select Payment Mode --</option>
+      <option value="UPI">UPI</option>
+      <option value="Cash">Cash</option>
+      <option value="Pending">Pending</option>
+    </select>
+  </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Notes</label>
-                <textarea name="notes" rows="2" class="form-control">{{ order.notes if order else '' }}</textarea>
-            </div>
+  <div class="col-md-3">
+    <label class="form-label">Delivery Status</label>
+    <select name="delivery_status" class="form-select" required>
+      <option value="">-- Select Delivery Status --</option>
+      <option>Pending</option>
+      <option>Shipped</option>
+      <option>Delivered</option>
+      <option>Cancelled</option>
+    </select>
+    <div class="invalid-feedback">Pick delivery status</div>
+  </div>
 
-        </div>
-    </div>
+  <div class="col-12">
+    <label class="form-label">Remarks</label>
+    <input name="remarks" class="form-control" placeholder="Optional">
+  </div>
 
-    <div class="mt-3 text-end">
-        <button type="submit" class="btn btn-success px-4">Save</button>
-    </div>
+  <div class="col-12">
+    <button class="btn btn-primary">Save</button>
+    <a href="{{ url_for('orders') }}" class="btn btn-outline-secondary">Cancel</a>
+  </div>
 </form>
+
+<script>
+// Bootstrap client-side validation
+(function() {
+  const forms = document.querySelectorAll('.needs-validation');
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', e => {
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+
+// Auto-toggle Payment Mode based on Status
+(function(){
+  const st = document.getElementById('payment_status');
+  const mode = document.getElementById('payment_mode');
+  if (!st || !mode) return;
+
+  function toggleMode() {
+    if (st.value === 'Pending' || st.value === '') {
+      mode.value = 'Pending';
+      mode.disabled = true;
+    } else {
+      if (mode.value === 'Pending') mode.value = '';
+      mode.disabled = false;
+    }
+  }
+  st.addEventListener('change', toggleMode);
+  window.addEventListener('load', toggleMode);
+})();
+</script>
 
 {% endblock %}
 

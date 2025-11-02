@@ -506,11 +506,50 @@ def settings():
         flash("Settings saved.", "success")
         return redirect(url_for("settings"))
     return render_template("settings.html", business=APP_NAME)
+@app.route("/_status")
+def _status():
+    try:
+        customers_count = db.session.query(db.func.count(Customer.id)).scalar() or 0
+        orders_count = db.session.query(db.func.count(Order.id)).scalar() or 0
+        followups_count = db.session.query(db.func.count(FollowUp.id)).scalar() or 0
+        return jsonify({
+            "ok": True,
+            "customers": int(customers_count),
+            "orders": int(orders_count),
+            "followups": int(followups_count),
+        })
+    except Exception:
+        log.exception("Status check failed")
+        return jsonify({"ok": False, "error": "status check failed"}), 500
+
+# ...existing code...
 
 # --- App init ------------------------------------------------------------------
 if __name__ == "__main__":
     # Ensure DB & tables exist
     with app.app_context():
         db.create_all()
-    app.run(host="0.0.0.0", port=5000, debug=False)
 
+        # check if DB is empty (no orders) and optionally run seed_quick.py
+        try:
+            orders_exist = (db.session.query(db.func.count(Order.id)).scalar() or 0) > 0
+        except Exception:
+            orders_exist = False
+
+        auto_seed = os.environ.get("AUTO_SEED", "0") == "1"
+        if (not orders_exist) or auto_seed:
+            seed_script = BASE_DIR / "seed_quick.py"
+            if seed_script.exists():
+                try:
+                    import subprocess, sys
+                    log.info("DB empty or AUTO_SEED set — running seed_quick.py")
+                    subprocess.run([sys.executable, str(seed_script)], check=True)
+                    log.info("Seeding finished")
+                except Exception:
+                    log.exception("Seeding failed; continuing without seed")
+            else:
+                log.warning("seed_quick.py not found; skipping auto-seed")
+
+    # development-friendly run (set DEBUG via env if you want)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=os.environ.get("FLASK_DEBUG", "0") == "1")
+# ...existing code...

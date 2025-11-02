@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row g-4">
+
+    <!-- Total Orders -->
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h6 class="text-muted">Total Orders</h6>
+                <h3 class="fw-bold">{{ total_orders }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paid Amount -->
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h6 class="text-muted">Total Paid</h6>
+                <h3 class="fw-bold text-success">₹{{ total_paid }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Amount -->
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h6 class="text-muted">Pending Amount</h6>
+                <h3 class="fw-bold text-danger">₹{{ total_pending }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Followups -->
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h6 class="text-muted">Pending Follow-ups</h6>
+                <h3 class="fw-bold">{{ pending_followups }}</h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<hr class="my-4">
+
+<div class="row g-4">
+
+    <!-- Monthly Orders Chart -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-bold">📅 Monthly Orders</div>
+            <div class="card-body">
+                <canvas id="ordersChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Mode Split -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-bold">💳 Payment Mode Split</div>
+            <div class="card-body">
+                <canvas id="paymentPie"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Example chart placeholders, real data will be injected later.
+console.log("Dashboard loaded");
+</script>
+
+{% endblock %}
+

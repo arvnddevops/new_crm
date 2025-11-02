@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold">Backup & Restore</h4>
+</div>
+
+<div class="row g-4">
+
+    <!-- Download DB -->
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h5 class="fw-semibold mb-2">Download Database</h5>
+            <p class="text-muted small mb-3">Click below to download the current CRM SQLite database file.</p>
+            <a href="{{ url_for('download_db') }}" class="btn btn-success px-4">
+                ⬇️ Download DB File
+            </a>
+        </div>
+    </div>
+
+    <!-- Restore DB -->
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h5 class="fw-semibold mb-2">Restore / Import Database</h5>
+            <p class="text-muted small mb-3">Upload a previously backed-up DB file. <br>
+            <b>⚠️ Warning:</b> This will replace all current data.</p>
+
+            <form method="POST" action="{{ url_for('restore_db') }}" enctype="multipart/form-data">
+                <input type="file" name="dbfile" class="form-control mb-3" required>
+                <button type="submit" class="btn btn-danger px-4">
+                    🔄 Restore Database
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<hr class="my-4"/>
+
+<!-- Backup history -->
+<div class="card p-4">
+    <h5 class="fw-semibold mb-3">Backup History</h5>
+
+    {% if backups %}
+        <ul class="list-group">
+            {% for b in backups %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>{{ b.filename }}</span>
+                    <span class="text-muted small">{{ b.date }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No backup logs found.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
+

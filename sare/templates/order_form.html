@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold">{{ "Edit Order" if order else "Add Order" }}</h4>
+    <a href="{{ url_for('orders') }}" class="btn btn-secondary btn-sm">← Back</a>
+</div>
+
+<form method="POST" action="">
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Customer</label>
+                    <select name="customer_id" class="form-select" required>
+                        <option value="">-- Select Customer --</option>
+                        {% for c in customers %}
+                        <option value="{{ c.id }}" {% if order and c.id == order.customer_id %}selected{% endif %}>
+                            {{ c.name }} - {{ c.city }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Order Date</label>
+                    <input type="date" name="order_date" value="{{ order.order_date if order else '' }}" class="form-control" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Delivery Status</label>
+                    <select name="delivery_status" class="form-select" required>
+                        {% set status = order.delivery_status if order else '' %}
+                        <option value="Pending"   {{ "selected" if status == "Pending" else "" }}>Pending</option>
+                        <option value="Shipped"   {{ "selected" if status == "Shipped" else "" }}>Shipped</option>
+                        <option value="Delivered" {{ "selected" if status == "Delivered" else "" }}>Delivered</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Total Amount (₹)</label>
+                    <input type="number" name="amount" value="{{ order.amount if order else '' }}" class="form-control" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Paid Amount (₹)</label>
+                    <input type="number" name="paid_amount" value="{{ order.paid_amount if order else '' }}" class="form-control" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Payment Status</label>
+                    <select name="payment_status" class="form-select" required>
+                        {% set ps = order.payment_status if order else '' %}
+                        <option value="Paid"     {{ "selected" if ps == "Paid" else "" }}>Paid</option>
+                        <option value="Pending"  {{ "selected" if ps == "Pending" else "" }}>Pending</option>
+                        <option value="Partial"  {{ "selected" if ps == "Partial" else "" }}>Partial</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Notes</label>
+                <textarea name="notes" rows="2" class="form-control">{{ order.notes if order else '' }}</textarea>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="mt-3 text-end">
+        <button type="submit" class="btn btn-success px-4">Save</button>
+    </div>
+</form>
+
+{% endblock %}
+

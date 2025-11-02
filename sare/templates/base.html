@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ business }} - CRM</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: white;
+            border-right: 1px solid #e5e5e5;
+            padding: 20px 15px;
+        }
+        .sidebar a {
+            display: block;
+            padding: 8px 0;
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            color: #0d6efd;
+        }
+        .content {
+            padding: 25px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h5 class="mb-3">{{ business }}</h5>
+        <a href="{{ url_for('dashboard') }}">📊 Dashboard</a>
+        <a href="{{ url_for('orders') }}">🧾 Orders</a>
+        <a href="{{ url_for('payments') }}">💰 Payments</a>
+        <a href="{{ url_for('customers') }}">👥 Customers</a>
+        <a href="{{ url_for('followups') }}">📅 Follow-ups</a>
+        <a href="{{ url_for('reports') }}">📈 Reports</a>
+        <a href="{{ url_for('settings') }}">⚙️ Settings</a>
+    </div>
+
+    <!-- Main Body -->
+    <div class="content flex-grow-1">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ msg }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block body %}{% endblock %}
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>
+

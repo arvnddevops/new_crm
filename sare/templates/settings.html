@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold">Settings</h4>
+</div>
+
+<div class="card p-4">
+
+    <form method="POST" action="{{ url_for('save_settings') }}" enctype="multipart/form-data">
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Business / Brand Name</label>
+            <input type="text" class="form-control" name="business_name" value="{{ settings.business_name }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Owner / Admin Email</label>
+            <input type="email" class="form-control" name="owner_email" value="{{ settings.owner_email }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Business Logo (optional)</label>
+            {% if settings.logo_path %}
+                <div class="mb-2">
+                    <img src="{{ url_for('static', filename='uploads/' ~ settings.logo_path) }}" height="80">
+                </div>
+            {% endif %}
+            <input type="file" class="form-control" name="logo">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Theme</label>
+            <select class="form-select" name="theme">
+                <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>Light</option>
+                <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>Dark</option>
+                <option value="auto" {% if settings.theme == 'auto' %}selected{% endif %}>Auto (based on system)</option>
+            </select>
+        </div>
+
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-primary px-4">Save Settings</button>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+

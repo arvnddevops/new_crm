@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold">{{ 'Edit' if followup else 'Add' }} Follow Up</h4>
+    <a href="{{ url_for('followups') }}" class="btn btn-outline-secondary btn-sm">⬅ Back</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+
+        <form method="POST">
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Date</label>
+                <input type="date" name="date" class="form-control" required
+                       value="{{ followup.date.strftime('%Y-%m-%d') if followup else '' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Customer</label>
+                <select name="customer_id" class="form-select" required>
+                    <option value="">-- Select Customer --</option>
+                    {% for c in customers %}
+                        <option value="{{ c.id }}"
+                                {% if followup and followup.customer_id == c.id %}selected{% endif %}>
+                            {{ c.name }} ({{ c.phone }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Notes</label>
+                <textarea name="notes" class="form-control" rows="3" required>{{ followup.notes if followup else '' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Status</label>
+                <select name="status" class="form-select" required>
+                    <option value="Pending" {% if not followup or followup.status == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Done" {% if followup and followup.status == 'Done' %}selected{% endif %}>Done</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary px-4">Save</button>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
+

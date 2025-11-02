@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold">
+        {% if customer %} Edit Customer {% else %} Add Customer {% endif %}
+    </h4>
+    <a href="{{ url_for('customers') }}" class="btn btn-secondary btn-sm">← Back</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+
+        <form method="POST">
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Customer Name *</label>
+                    <input type="text" name="name" class="form-control" required value="{{ customer.name if customer else '' }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Phone *</label>
+                    <input type="text" name="phone" class="form-control" required value="{{ customer.phone if customer else '' }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">City</label>
+                    <input type="text" name="city" class="form-control" value="{{ customer.city if customer else '' }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Customer Type</label>
+                    <select name="ctype" class="form-select">
+                        <option value="">-- Select --</option>
+                        <option value="Retail"  {% if customer and customer.ctype=='Retail' %}selected{% endif %}>Retail</option>
+                        <option value="Wholesale" {% if customer and customer.ctype=='Wholesale' %}selected{% endif %}>Wholesale</option>
+                        <option value="Supplier" {% if customer and customer.ctype=='Supplier' %}selected{% endif %}>Supplier</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Notes</label>
+                    <textarea name="notes" class="form-control" rows="3">{{ customer.notes if customer else '' }}</textarea>
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">✅ Save</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
+

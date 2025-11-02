@@ -526,30 +526,41 @@ def _status():
 
 # --- App init ------------------------------------------------------------------
 if __name__ == "__main__":
-    # Ensure DB & tables exist
-    with app.app_context():
-        db.create_all()
+    import sys
 
-        # check if DB is empty (no orders) and optionally run seed_quick.py
-        try:
-            orders_exist = (db.session.query(db.func.count(Order.id)).scalar() or 0) > 0
-        except Exception:
-            orders_exist = False
+    # Check for an initialization flag (used by systemd)
+    # The flag --init will be used to run setup logic without starting the server.
+    is_init_mode = "--init" in sys.argv
 
-        auto_seed = os.environ.get("AUTO_SEED", "0") == "1"
-        if (not orders_exist) or auto_seed:
-            seed_script = BASE_DIR / "seed_quick.py"
-            if seed_script.exists():
-                try:
-                    import subprocess, sys
-                    log.info("DB empty or AUTO_SEED set — running seed_quick.py")
-                    subprocess.run([sys.executable, str(seed_script)], check=True)
-                    log.info("Seeding finished")
-                except Exception:
-                    log.exception("Seeding failed; continuing without seed")
-            else:
-                log.warning("seed_quick.py not found; skipping auto-seed")
+    # Ensure DB & tables exist and run seed if required
+    if is_init_mode:
+        log.info("Running database initialization (INIT MODE)...")
+        with app.app_context():
+            db.create_all()
 
-    # development-friendly run (set DEBUG via env if you want)
+            # check if DB is empty (no orders) and optionally run seed_quick.py
+            try:
+                orders_exist = (db.session.query(db.func.count(Order.id)).scalar() or 0) > 0
+            except Exception:
+                orders_exist = False
+
+            auto_seed = os.environ.get("AUTO_SEED", "0") == "1"
+            if (not orders_exist) or auto_seed:
+                seed_script = BASE_DIR / "seed_quick.py"
+                if seed_script.exists():
+                    try:
+                        import subprocess
+                        log.info("DB empty or AUTO_SEED set — running seed_quick.py")
+                        # Use python3 explicit command to match your environment fix
+                        subprocess.run(["/usr/bin/python3", str(seed_script)], check=True)
+                        log.info("Seeding finished")
+                    except Exception:
+                        log.exception("Seeding failed; continuing without seed")
+                else:
+                    log.warning("seed_quick.py not found; skipping auto-seed")
+        
+        log.info("Initialization complete. Exiting...")
+        sys.exit(0) # Exit cleanly after initialization
+
+    # Normal development-friendly run (set DEBUG via env if you want)
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=os.environ.get("FLASK_DEBUG", "0") == "1")
-# ...existing code...

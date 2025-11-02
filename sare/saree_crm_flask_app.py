@@ -184,56 +184,81 @@ def on_any_error(e):
 def root():
     return redirect(url_for("dashboard"))
 
-@app.route("/dashboard")
+# ...existing code...
 @app.route("/dashboard")
 def dashboard():
-    # Monthly stats (current month)
-    today = date.today()
-    month_start = date(today.year, today.month, 1)
+    from datetime import date
 
-    # All-time totals for cards
-    total_paid = db.session.query(db.func.coalesce(db.func.sum(Order.amount), 0))\
-        .filter(Order.payment_status == "Paid").scalar() or 0
-    total_pending = db.session.query(db.func.coalesce(db.func.sum(Order.amount), 0))\
-        .filter(Order.payment_status == "Pending").scalar() or 0
+    try:
+        today = date.today()
 
-    total_orders = db.session.query(db.func.count(Order.id)).scalar() or 0
-    # pending follow-ups (Open)
-    pending_followups = db.session.query(db.func.count(FollowUp.id))\
-        .filter(FollowUp.status == "Open").scalar() or 0
+        # Totals
+        total_orders = db.session.query(db.func.count(Order.id)).scalar() or 0
+        total_paid = (
+            db.session.query(db.func.coalesce(db.func.sum(Order.amount), 0))
+            .filter(Order.payment_status == "Paid")
+            .scalar()
+            or 0
+        )
+        total_pending = (
+            db.session.query(db.func.coalesce(db.func.sum(Order.amount), 0))
+            .filter(Order.payment_status == "Pending")
+            .scalar()
+            or 0
+        )
+        pending_followups = (
+            db.session.query(db.func.count(FollowUp.id))
+            .filter(FollowUp.status == "Open")
+            .scalar()
+            or 0
+        )
 
-    # Monthly orders (last 6 months) for simple charting
-    from datetime import timedelta
-    labels = []
-    data_points = []
-    # build last 6 months labels
-    for i in range(5, -1, -1):
-        m = (today.replace(day=1) - timedelta(days=1)).replace(day=1)  # helper (we'll compute month-start differently)
-        # compute month start by subtracting months
-        ym = (today.month - i - 1) % 12 + 1
-        y = today.year + ((today.month - i - 1) // 12)
-        month_start_i = date(y, ym, 1)
-        # next month start
-        if ym == 12:
-            next_month = date(y + 1, 1, 1)
-        else:
-            next_month = date(y, ym + 1, 1)
-        cnt = db.session.query(db.func.count(Order.id))\
-            .filter(Order.date >= month_start_i, Order.date < next_month).scalar() or 0
-        labels.append(month_start_i.strftime("%b %Y"))
-        data_points.append(cnt)
+        # Last 6 months labels & counts
+        labels = []
+        data_points = []
+        for i in range(5, -1, -1):
+            # compute year/month for (today - i months)
+            m = (today.month - i - 1) % 12 + 1
+            y = today.year + ((today.month - i - 1) // 12)
+            month_start = date(y, m, 1)
+            if m == 12:
+                next_month = date(y + 1, 1, 1)
+            else:
+                next_month = date(y, m + 1, 1)
 
-    # Payment mode split (Paid only)
-    mode_rows = (
-        db.session.query(Order.payment_mode, db.func.count(Order.id))
-        .filter(Order.payment_status == "Paid")
-        .group_by(Order.payment_mode)
-        .all()
+            cnt = (
+                db.session.query(db.func.count(Order.id))
+                .filter(Order.date >= month_start, Order.date < next_month)
+                .scalar()
+                or 0
+            )
+            labels.append(month_start.strftime("%b %Y"))
+            data_points.append(cnt)
+
+        # Payment mode split (Paid only)
+        mode_rows = (
+            db.session.query(Order.payment_mode, db.func.count(Order.id))
+            .filter(Order.payment_status == "Paid")
+            .group_by(Order.payment_mode)
+            .all()
+        )
+        payment_mode_split = {m or "Unknown": int(c) for (m, c) in mode_rows}
+
+    except Exception:
+        # Don't break page if DB missing or schema differs; show zeros
+        log.exception("Dashboard generation failed")
+        total_orders = total_paid = total_pending = pending_followups = 0
+        labels = []
+        data_points = []
+        payment_mode_split = {}
+
+    log.debug(
+        "Dashboard context: total_orders=%s total_paid=%s total_pending=%s pending_followups=%s",
+        total_orders,
+        total_paid,
+        total_pending,
+        pending_followups,
     )
-    payment_mode_split = {m or "Unknown": c for (m, c) in mode_rows}
-
-    log.debug("Dashboard context: total_orders=%s total_paid=%s total_pending=%s pending_followups=%s",
-              total_orders, total_paid, total_pending, pending_followups)
 
     return render_template(
         "dashboard.html",
@@ -246,6 +271,7 @@ def dashboard():
         orders_chart_data=data_points,
         payment_mode_split=payment_mode_split,
     )
+# ...existing code...
 
 # --- Customers -----------------------------------------------------------------
 @app.route("/customers", methods=["GET", "POST"])
